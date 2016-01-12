@@ -35,6 +35,12 @@ JSONStream = require 'JSONStream'
 async = require 'async'
 f = require('flates')
 sanitize = require 'sanitize-caja'
+marked = require 'marked'
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+  sanitize: false
+})
 
 # Express 4 middleware
 logger = require 'morgan'
@@ -70,6 +76,11 @@ render = (page) ->
         else if story.type is 'html'
           f.div {class: "item html"},
           f.p(wiki.resolveLinks(story.text or '', sanitize))
+        else if story.type is 'markdown'
+          f.div {class: "item markdown"},
+            # N.B. marked does not support GitHub task lists, yet.
+            marked wiki.resolveLinks(story.text)
+
         else f.div {class: "item"}, f.p(wiki.resolveLinks(story.text or ''))
       ).join('\n')
 
